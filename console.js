@@ -1,3 +1,6 @@
+const NEWLINE = "\n";
+const BACKSPACE = "\b";
+const KEYCODE_BACKSPACE = 8;
 class Console {
   constructor(
     columns,
@@ -71,6 +74,96 @@ class Console {
         }
     }
 */
+
+  // 1. move cursor to the beginning of next line
+  //    b. cursor to beginning of line with possible scroll
+  // 2. handle CR from text
+  //    b. cursor to beginning of line with possible scroll
+  //    c. reset start and end markers
+  // 3. handle <return> key from keyboard
+  //    a. capture text
+  //    b. cursor to beginning of line with possible scroll
+  //    c. reset start and end markers
+
+  _incrementCursorPosition() {
+    ++this.cursor.column;
+    if (this.cursor.column >= this.columns) {
+      this._handleCursorToNewline();
+    }
+  }
+
+  _handleCursorToNewline() {
+    ++this.cursor.row;
+    this.cursor.column = 0;
+    if (this.cursor.row >= this.rows) {
+      this.scroll();
+    }
+  }
+
+  _handleBackspace() {
+    if (
+      this._bufferOffset(this.cursor) > this._bufferOffset(this.startOfLine)
+    ) {
+      --this.cursor.column;
+      if (this.cursor.column < 0) {
+        this.cursor.column = this.columns - 1;
+        if (this.cursor.row > 0) {
+          --this.cursor.row;
+        }
+      }
+    }
+
+    this.screenbuffer[this._bufferOffset(this.cursor)] = " ";
+  }
+
+  _updateStartMarkerToCursorPosition() {
+    this.startOfLine = shallowCopy(this.cursor);
+  }
+
+  _updateEndMarkerToCursorPosition() {
+    this.endOfLine = shallowCopy(this.cursor);
+  }
+
+  _handleString(str, isFromKeyboard) {
+    if (str !== null) {
+      for (let ch of str) {
+        this._handleCharacter(ch, isFromKeyboard);
+      }
+    }
+  }
+
+  _handleCharacter(ch, isFromKeyboard) {
+    if (ch === NEWLINE) {
+      if (isFromKeyboard) {
+        // capture the text
+        var inputText = this.captureEnteredText();
+        console.log(`Entered text : '${inputText}'`);
+      }
+      this._handleCursorToNewline();
+
+      // update the capture markers
+      this._updateStartMarkerToCursorPosition();
+      this._updateEndMarkerToCursorPosition();
+    } else if (ch === BACKSPACE) {
+      this._handleBackspace();
+      this._updateEndMarkerToCursorPosition();
+    } else {
+      // add the character to the screen buffer
+      this.screenbuffer[this._bufferOffset(this.cursor)] = ch;
+
+      // increment the cursor position
+      this._incrementCursorPosition();
+
+      // update the capture markers
+      if (!isFromKeyboard) {
+        this._updateStartMarkerToCursorPosition();
+      }
+      this._updateEndMarkerToCursorPosition();
+    }
+
+    this.render();
+  }
+
   _write(text, withNewLine, markStartOfLine, markEndOfLine) {
     for (var character of text) {
       if (character === "\n") {
@@ -133,13 +226,7 @@ class Console {
     for (var i = 0; i < countOfCharactersToCapture; ++i) {
       s += this.screenbuffer[startOfLineOffset + i];
     }
-
-    //console.log(`this.endOfLine.row : ${this.endOfLine.row}`);
-    //console.log(`this.endOfLine.column : ${this.endOfLine.column}`);
-    //console.log(`startOfLineOffset : ${startOfLineOffset}`);
-    //console.log(`endOfLineOffset : ${endOfLineOffset}`);
-    //console.log(`countOfCharactersToCapture : ${countOfCharactersToCapture}`);
-    console.log(s);
+    return s;
   }
 
   newline(isHardNewline, shouldCapture) {
@@ -236,6 +323,9 @@ class Console {
     for (var columnIndex = 0; columnIndex < this.columns; ++columnIndex) {
       this.screenbuffer[(this.rows - 1) * this.columns + columnIndex] = " ";
     }
+    --this.cursor.row;
+    --this.startOfLine.row;
+    --this.endOfLine.row;
   }
 
   render() {
@@ -355,21 +445,30 @@ class Console {
   }
 
   keyHandler(event) {
+    console.log("this.playSoundFn()");
     this.playSoundFn();
-    //console.log("keyHandler() - event.key : " + event.key);
+    console.log(`keyHandler('${event.key}')`);
     if (event.key === "Enter") {
-      this.newline(true, true);
-      return;
+      this._handleCharacter(NEWLINE, true);
+    } else if (event.key === "Backspace") {
+      this._handleCharacter(BACKSPACE, true);
+    } else {
+      this._handleString(event.key, true);
     }
-    if (event.key === "Backspace") {
-      this.backspace();
-      return;
-    }
-    this._write(event.key, false, false, true);
   }
 
   keyDownHandler(event) {
+    console.log(`keyDownHandler(${event.keyCode}, ${event.charCode})`);
     var key = event.keyCode || event.charCode;
+
+    // Chrome doesn't give us "backspace" in the key handler,
+    // so we have to catch it here
+    if (key == KEYCODE_BACKSPACE) {
+      this._handleCharacter(BACKSPACE, true);
+      this.playSoundFn();
+    }
+
+    /*
     //console.log("keyDownHandler() - key : " + key);
     if (key == 8 || key == 46) {
       //this.backspace();
@@ -383,5 +482,6 @@ class Console {
       this.playSoundFn();
       this.rightArrow();
     }
+      */
   }
 }

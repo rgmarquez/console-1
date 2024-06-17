@@ -8,7 +8,7 @@ It's based on several-year old JavaScript I wrote several years ago; hence I am 
 
 To run, just set up a web server (a simple Node/JavaScript server will do) to serve the repo folder on a particular port (say 8888), and then point your web brouwser to the index.html file using that port (http://localhost:8888//index.html).
 
-The "fun" for me was creating routines to convert the eight 8-bit values representing each character glyph/bitmap, and converting them to drawable shapes.
+The fun for me was creating routines to convert the eight 8-bit values representing each character glyph/bitmap, converting them to drawable shapes, and drawing them to a canvas layer.
 
 For example, the letter "A" bitbap is [0, 24, 60, 102, 102, 126, 102, 0], stored as 8-bit values; each 8-bit value encoded the "on" or "off" pixels in each row of the letter's image:
 

@@ -38,10 +38,6 @@ class Console {
     this.startOfLine = { row: 0, column: 0 };
     this.endOfLine = { row: 0, column: 0 };
 
-    this.audio = new Audio("./Atari8BitKeyClick.mp3");
-    console.log(`this.audio : ${this.audio}`);
-    this.audio.preload = "auto";
-
     this.setKeyHandler();
 
     this.setCursorBlinking(true);
@@ -278,8 +274,7 @@ class Console {
   }
 
   keyHandler(event) {
-    //this.playSoundFn();
-    this.audio.play();
+    this.playSoundFn();
     if (event.key === "Enter") {
       this._handleCharacter(NEWLINE, true);
     } else if (event.key === "Backspace") {
@@ -291,13 +286,11 @@ class Console {
 
   keyDownHandler(event) {
     var key = event.keyCode || event.charCode;
-
     // Chrome doesn't give us "backspace" in the key handler,
     // so we have to catch it here
     if (key == KEYCODE_BACKSPACE) {
-      this.audio.play();
+      this.playSoundFn();
       this._handleCharacter(BACKSPACE, true);
-      //this.playSoundFn();
     }
   }
 }

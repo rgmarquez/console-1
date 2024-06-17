@@ -1,51 +1,54 @@
 class App {
-    constructor() {
-        const columns = 40;
-        const rows = 24;
-        const scale = 3;
-        const characterSize = 8 * scale;
-    
-        let canvasElementIds = ["layer1", "layer2", "layer3"];
-        let canvasElements = getElementsById(canvasElementIds);
+  constructor() {
+    const columns = 40;
+    const rows = 24;
+    const scale = 3;
+    const characterSize = 8 * scale;
 
-        let containingElement = document.activeElement; // HTMLBodyElement
+    let canvasElementIds = ["layer1", "layer2", "layer3"];
+    let canvasElements = getElementsById(canvasElementIds);
 
-        // layers
-        this.canvas = new LayeredCanvas(canvasElements, columns * characterSize, rows * characterSize);
+    let containingElement = document.activeElement; // HTMLBodyElement
 
-        // fonts
-        this.font = buildFont(atari8bitFont, [114, 187, 244, 255], [19, 81, 160, 255]);
-        this.cursorFont = buildFont(cursorsFont, [114, 187, 244, 255], [0, 0, 0, 0]);
+    // layers
+    this.canvas = new LayeredCanvas(
+      canvasElements,
+      columns * characterSize,
+      rows * characterSize
+    );
 
-        // sound playback
-        this.playSound = function() {
-            let sound = this.getSound(0);
-            if (sound !== null) {
-                sound.play();
-            }
-        }
+    // fonts
+    this.font = buildFont(
+      atari8bitFont,
+      [114, 187, 244, 255],
+      [19, 81, 160, 255]
+    );
+    this.cursorFont = buildFont(
+      cursorsFont,
+      [114, 187, 244, 255],
+      [0, 0, 0, 0]
+    );
 
-        this.console = new Console(
-            columns, rows, scale, this.font, this.cursorFont,
-            [this.canvas.contexts2d[1], this.canvas.contexts2d[0]],
-            containingElement, this.playSound.bind(this)
-        );
+    // sound playback
+    this.audio = new Audio("./Atari8BitKeyClick.mp3");
+    this.audio.preload = "auto";
+    this.playSound = function () {
+      this.audio.play();
+    };
 
-        // audio
-        let context = new (window.AudioContext || window.webkitAudioContext)();
-        let buffer = new Buffer(context, sounds);
-        buffer.loadAll();
-
-        this.getSound = function(index) {
-            let soundBuffer = buffer.getSoundByIndex(index);
-            if (typeof soundBuffer === "undefined") {
-                return null;
-            }
-            return new Sound(context, soundBuffer);
-        }
-    }
+    this.console = new Console(
+      columns,
+      rows,
+      scale,
+      this.font,
+      this.cursorFont,
+      [this.canvas.contexts2d[1], this.canvas.contexts2d[0]],
+      containingElement,
+      this.playSound.bind(this)
+    );
+  }
 }
 
-window.onload = function() {
-    window.app = new App();
+window.onload = function () {
+  window.app = new App();
 };

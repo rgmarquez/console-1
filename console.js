@@ -38,52 +38,15 @@ class Console {
     this.startOfLine = { row: 0, column: 0 };
     this.endOfLine = { row: 0, column: 0 };
 
-    //this.setInsertMode(true); // vs overstrike
+    this.audio = new Audio("./Atari8BitKeyClick.mp3");
+    console.log(`this.audio : ${this.audio}`);
+    this.audio.preload = "auto";
 
     this.setKeyHandler();
 
     this.setCursorBlinking(true);
     this.render();
   }
-  /*
-  setInsertMode(value) {
-    this._insertMode = value;
-  }
-
-  getInsertMode() {
-    return this._insertMode;
-  }
-*/
-  write(text) {
-    this._write(text, false, true, false);
-  }
-
-  writeln(text) {
-    this._write(text, true, true, false);
-  }
-  /*
-    _moveRestOfLineToTheRight() {
-        // from the cursor to endOfLine, move characters to the right
-        let cursorOffset = this._bufferOffset(this.cursor);
-        let endOfLineOffset = this._bufferOffset(this.endOfLine);
-        // TODO :scroll on last line
-        if (cursorOffset < endOfLineOffset) {
-            for (var offset = endOfLineOffset - 1; offset >= cursorOffset; --offset) {
-                this.screenbuffer[offset + 1] = this.screenbuffer[offset];
-            }
-        }
-    }
-*/
-
-  // 1. move cursor to the beginning of next line
-  //    b. cursor to beginning of line with possible scroll
-  // 2. handle CR from text
-  //    b. cursor to beginning of line with possible scroll
-  //    c. reset start and end markers
-  // 3. handle <return> key from keyboard
-  //    a. capture text
-  //    b. cursor to beginning of line with possible scroll
-  //    c. reset start and end markers
 
   _incrementCursorPosition() {
     ++this.cursor.column;
@@ -164,62 +127,8 @@ class Console {
     this.render();
   }
 
-  _write(text, withNewLine, markStartOfLine, markEndOfLine) {
-    for (var character of text) {
-      if (character === "\n") {
-        this.newline(true, false);
-        continue;
-      }
-      //if (this.getInsertMode() == true) {
-      //  this._moveRestOfLineToTheRight();
-      //}
-      this.screenbuffer[this._bufferOffset(this.cursor)] = character;
-      ++this.cursor.column;
-      if (this.cursor.column >= this.columns || character === "\n") {
-        this.newline(false, false);
-      }
-    }
-
-    if (withNewLine) {
-      this.newline(true, false);
-    }
-
-    if (markStartOfLine) {
-      this.startOfLine = shallowCopy(this.cursor);
-      this.endOfLine = shallowCopy(this.cursor);
-    } else if (markEndOfLine) {
-      if (
-        this._bufferOffset(this.cursor) > this._bufferOffset(this.endOfLine)
-      ) {
-        this.endOfLine = shallowCopy(this.cursor);
-      } else {
-        console.log(
-          `vvvvv   this.endOfLine : (${this.endOfLine.row}, ${this.endOfLine.column})`
-        );
-        this._incrementPosition(this.endOfLine, text.length);
-        console.log(`text : ${text}, text.length : ${text.length}`);
-        console.log(
-          `^^^^^   this.endOfLine : (${this.endOfLine.row}, ${this.endOfLine.column})`
-        );
-      }
-    }
-    this.render();
-  }
-
-  _incrementPosition(item, amount) {
-    let offset = this._bufferOffset(item);
-    offset += amount;
-    offset = Math.min(this._maxBufferOffset(), offset);
-    item.row = Math.trunc(offset / this.columns);
-    item.column = offset - item.row * this.columns;
-
-    //let remainder = offset % this.columns;
-    //item.row = (offset - remainder) / this.columns;
-    //item.column = offset;
-  }
-
   captureEnteredText() {
-    let startOfLineOffset = this._startOfLineOffset();
+    let startOfLineOffset = this._bufferOffset(this.startOfLine);
     let endOfLineOffset = this._bufferOffset(this.endOfLine);
     let countOfCharactersToCapture = endOfLineOffset - startOfLineOffset;
     let s = "";
@@ -229,87 +138,11 @@ class Console {
     return s;
   }
 
-  newline(isHardNewline, shouldCapture) {
-    if (shouldCapture) {
-      this.captureEnteredText();
-    }
-    ++this.cursor.row;
-    this.cursor.column = 0;
-    if (this.cursor.row >= this.rows) {
-      this.scroll();
-      --this.cursor.row;
-      --this.startOfLine.row;
-      --this.endOfLine.row;
-    }
-    if (isHardNewline) {
-      this.startOfLine = shallowCopy(this.cursor);
-      this.endOfLine = shallowCopy(this.cursor);
-    }
-    this.render();
-  }
-
-  backspace() {
-    if (
-      !(
-        this.cursor.row == this.startOfLine.row &&
-        this.cursor.column == this.startOfLine.column
-      )
-    ) {
-      --this.cursor.column;
-      if (this.cursor.column < 0) {
-        this.cursor.column = this.columns - 1;
-        --this.cursor.row;
-      }
-      this.screenbuffer[this.cursor.row * this.columns + this.cursor.column] =
-        " ";
-      this.endOfLine = shallowCopy(this.cursor);
-    }
-    this.render();
-  }
-
-  _cursorOffset() {
-    let offset = this.cursor.row * this.columns + this.cursor.column;
-    return offset;
-  }
-
-  _startOfLineOffset() {
-    let offset = this.startOfLine.row * this.columns + this.startOfLine.column;
-    return offset;
-  }
-
   _bufferOffset(coordinates) {
     let offset = coordinates.row * this.columns + coordinates.column;
     return offset;
   }
 
-  _maxBufferOffset() {
-    return this.rows * this.columns - 1;
-  }
-  /*
-  leftArrow() {
-    this.setCursorSkipABlink(false);
-    this.setCursorBlinkState(true);
-    if (this._cursorOffset() > this._startOfLineOffset()) {
-      --this.cursor.column;
-      if (this.cursor.column < 0) {
-        this.cursor.column = this.columns - 1;
-        --this.cursor.row;
-      }
-    }
-  }
-
-  rightArrow() {
-    this.setCursorSkipABlink(false);
-    this.setCursorBlinkState(true);
-    if (this._cursorOffset() < this._bufferOffset(this.endOfLine)) {
-      ++this.cursor.column;
-      if (this.cursor.column >= this.columns) {
-        this.cursor.column = 0;
-        ++this.cursor.row;
-      }
-    }
-  }
-*/
   scroll() {
     // move all lines up one line, add a new blank line to the bottom
     for (var lineIndex = 0; lineIndex < this.rows - 1; ++lineIndex) {
@@ -445,9 +278,8 @@ class Console {
   }
 
   keyHandler(event) {
-    console.log("this.playSoundFn()");
-    this.playSoundFn();
-    console.log(`keyHandler('${event.key}')`);
+    //this.playSoundFn();
+    this.audio.play();
     if (event.key === "Enter") {
       this._handleCharacter(NEWLINE, true);
     } else if (event.key === "Backspace") {
@@ -458,30 +290,14 @@ class Console {
   }
 
   keyDownHandler(event) {
-    console.log(`keyDownHandler(${event.keyCode}, ${event.charCode})`);
     var key = event.keyCode || event.charCode;
 
     // Chrome doesn't give us "backspace" in the key handler,
     // so we have to catch it here
     if (key == KEYCODE_BACKSPACE) {
+      this.audio.play();
       this._handleCharacter(BACKSPACE, true);
-      this.playSoundFn();
-    }
-
-    /*
-    //console.log("keyDownHandler() - key : " + key);
-    if (key == 8 || key == 46) {
-      //this.backspace();
       //this.playSoundFn();
     }
-    if (key == 37) {
-      this.playSoundFn();
-      this.leftArrow();
-    }
-    if (key == 39) {
-      this.playSoundFn();
-      this.rightArrow();
-    }
-      */
   }
 }

@@ -279,7 +279,7 @@ class Console {
     if (event.key === "Enter") {
       this._handleCharacter(NEWLINE, true);
     } else if (event.key === "Backspace") {
-      this._handleCharacter(BACKSPACE, true);
+      // Do nothing, this is to eat the event.key === "Backspace" that Safari generates
     } else {
       this._handleString(event.key, true);
     }
@@ -287,8 +287,6 @@ class Console {
 
   keyDownHandler(event) {
     var key = event.keyCode || event.charCode;
-    // Chrome doesn't give us "backspace" in the key handler,
-    // so we have to catch it here
     if (key == KEYCODE_BACKSPACE) {
       this.playSoundFn();
       this._handleCharacter(BACKSPACE, true);

@@ -204,7 +204,7 @@ class Console {
       this.characterSize,
       this.characterSize
     );
-
+    /*
     // Debugging : draw a box at the beginning of the "line"
     this.context2d.beginPath();
     this.context2d.strokeStyle = "blue";
@@ -227,6 +227,7 @@ class Console {
       this.characterSize
     );
     this.context2d.stroke();
+    */
   }
 
   setCursorBlinking(state) {

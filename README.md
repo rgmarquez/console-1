@@ -30,4 +30,4 @@ UPDATE: Added a demonstration app (guess.html) showing how to print to the conso
 
 guess.html:
 
-![Screenshot 2024-06-18 at 12 03 18 AM](https://github.com/rgmarquez/console-1/assets/943586/0c44f276-5640-4ba4-b3b2-f845ef5a5fef)
+![Screenshot 2024-06-18 at 12 00 49 AM](https://github.com/rgmarquez/console-1/assets/943586/ce896a2a-e99a-4398-a7a7-796177edfa58)

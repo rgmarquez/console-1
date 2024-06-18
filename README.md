@@ -24,3 +24,10 @@ For example, the letter "A" bitbap is [0, 24, 60, 102, 102, 126, 102, 0], stored
 ```
 
 ![Screenshot 2024-06-17 at 1 09 36 AM](https://github.com/rgmarquez/console-1/assets/943586/8f04293e-8e3c-48df-be06-72aeb65cd8ce)
+
+
+UPDATE: Added a demonstration app (guess.html) showing how to print to the console, as well as how to get text input from the console (ie from the user).  Using the console's input() method waits for the user to enter their data, but in a non-blocking way (using a returned Promise and 'await').
+
+guess.html:
+
+![Screenshot 2024-06-18 at 12 03 18 AM](https://github.com/rgmarquez/console-1/assets/943586/0c44f276-5640-4ba4-b3b2-f845ef5a5fef)

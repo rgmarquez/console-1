@@ -104,8 +104,6 @@ class Console {
         if (this._resolveInputPromise !== null) {
           this._resolveInputPromise(inputText);
           this._resolveInputPromise = null;
-        } else {
-          console.log("DEBUG : sorry, this._resolveInputPromise is null");
         }
       }
       this._handleCursorToNewline();

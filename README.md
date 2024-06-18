@@ -1,12 +1,12 @@
 # console-1
 
-A demonstration of a simulation of the Atari 800 command line console, running on a web page, just for fun.
+A demonstration of a simulation of the Atari 800 command line console, running on a web page, just for fun...but using bitmapped graphics (NOT HTML text) rendered on a canvas!
 
 It currently includes a lower case font, keyboard "click" sounds, text scrolling, cursor shapes, and blinking cursors.
 
 It's based on several-year old JavaScript I wrote several years ago; hence I am in the process of modernizing it to current JavaScript documentation and coding conventions.
 
-To run, just set up a web server (a simple Node/JavaScript server will do) to serve the repo folder on a particular port (say 8888), and then point your web brouwser to the index.html file using that port (http://localhost:8888//index.html).
+To run, just set up a web server (a simple Node/JavaScript server will do) to serve the repo folder on a particular port (say 8888), and then point your web browser to the index.html file using that port (http://localhost:8888//index.html).
 
 The fun for me was creating routines to convert the eight 8-bit values representing each character glyph/bitmap, converting them to drawable shapes, and drawing them to a canvas layer.
 

@@ -1,6 +1,7 @@
 const NEWLINE = "\n";
 const BACKSPACE = "\b";
 const KEYCODE_BACKSPACE = 8;
+
 class Console {
   constructor(
     columns,
@@ -37,6 +38,8 @@ class Console {
 
     this.startOfLine = { row: 0, column: 0 };
     this.endOfLine = { row: 0, column: 0 };
+
+    this._resolveInputPromise = null;
 
     this.setKeyHandler();
 
@@ -96,7 +99,14 @@ class Console {
       if (isFromKeyboard) {
         // capture the text
         var inputText = this.captureEnteredText();
-        console.log(`Entered text : '${inputText}'`);
+
+        // Use the previously created promise to return the input asynchronously
+        if (this._resolveInputPromise !== null) {
+          this._resolveInputPromise(inputText);
+          this._resolveInputPromise = null;
+        } else {
+          console.log("DEBUG : sorry, this._resolveInputPromise is null");
+        }
       }
       this._handleCursorToNewline();
 
@@ -291,5 +301,16 @@ class Console {
       this.playSoundFn();
       this._handleCharacter(BACKSPACE, true);
     }
+  }
+
+  print(str) {
+    this._handleString(str, false);
+  }
+
+  input() {
+    let self = this;
+    return new Promise(function (resolve, reject) {
+      self._resolveInputPromise = resolve;
+    });
   }
 }
